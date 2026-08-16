@@ -9,16 +9,16 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
-      - ./initdb:/docker-entrypoint-initdb.d
+      - ./postgres/initdb:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
       interval: 5s
       timeout: 3s
       retries: 5
   
-  webserver:
-    image: tomcat:11.0.24-jdk25-temurin-noble
-    container_name: some-tomcat
+  webapp:
+    build: ./webapp
+    container_name: some-webapp
     ports:
       - "8080:8080"
     depends_on:
