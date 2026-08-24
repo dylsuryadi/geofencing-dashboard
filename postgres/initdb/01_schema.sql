@@ -1,5 +1,6 @@
 CREATE TABLE tracked_object(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
     label TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -7,6 +8,7 @@ CREATE TABLE tracked_object(
 CREATE TABLE geofence(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
+    description TEXT NOT NULL,
     polygon JSONB NOT NULL,
     active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -17,10 +19,8 @@ CREATE TABLE position_event(
     object_id UUID NOT NULL REFERENCES tracked_object(id),
     lat DOUBLE PRECISION NOT NULL,
     lon DOUBLE PRECISION NOT NULL,
-    recorded_at TIMESTAMPTZ NOT NULL,
-    ingested_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    recorded_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_position_object_time ON position_event (object_id, recorded_at DESC);
 
 CREATE TABLE geofence_alert(
     id BIGSERIAL PRIMARY KEY,
@@ -29,4 +29,11 @@ CREATE TABLE geofence_alert(
     event_type TEXT NOT NULL CHECK (event_type IN ('entered', 'exited')),
     triggered_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_alert_object_time ON geofence_alert (object_id, triggered_at DESC);
+
+CREATE TABLE object_geofence_state(
+    object_id UUID NOT NULL REFERENCES tracked_object(id) ON DELETE CASCADE,
+    geofence_id UUID NOT NULL REFERENCES geofence(id) ON DELETE CASCADE,
+    is_inside BOOLEAN NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (object_id, geofence_id)
+);
