@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 CREATE TABLE tracked_object(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
@@ -9,18 +11,19 @@ CREATE TABLE geofence(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     description TEXT NOT NULL,
-    polygon JSONB NOT NULL,
+    geom GEOMETRY(Polygon, 4326) NOT NULL,
     active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+CREATE INDEX geofence_geom_idx ON geofence USING GIST (geom);
 
 CREATE TABLE position_event(
     id BIGSERIAL PRIMARY KEY,
     object_id UUID NOT NULL REFERENCES tracked_object(id),
-    lat DOUBLE PRECISION NOT NULL,
-    lon DOUBLE PRECISION NOT NULL,
+    location GEOMETRY(Point, 4326) NOT NULL,
     recorded_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+CREATE INDEX position_event_location_idx ON position_event USING GIST (location);
 
 CREATE TABLE geofence_alert(
     id BIGSERIAL PRIMARY KEY,
