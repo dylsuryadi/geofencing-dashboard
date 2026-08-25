@@ -16,11 +16,11 @@ services:
       timeout: 3s
       retries: 5
   
-  webapp:
+  backend:
     build:
-      context: ./webapp
+      context: ./backend
       dockerfile: src/main/docker/Dockerfile.jvm
-    container_name: some-webapp
+    container_name: some-backend
     env_file: ".env"
     ports:
       - "8080:8080"
