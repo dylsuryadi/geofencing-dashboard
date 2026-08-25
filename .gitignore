@@ -1,1 +1,10 @@
 .env
+
+# Maven build output
+webapp/target/
+
+# Maven wrapper
+webapp/.mvn/wrapper/maven-wrapper.jar
+
+scaffold-tmp/
+scaffold.log

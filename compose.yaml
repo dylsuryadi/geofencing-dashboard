@@ -2,23 +2,25 @@ name: geofencing-dashboard
 
 services:
   db:
-    image: postgres:18.6-trixie
+    image: postgis/postgis:18-3.6
     container_name: some-postgres
     env_file: ".env"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
-      - ./initdb:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 3s
       retries: 5
   
-  webserver:
-    image: tomcat:11.0.24-jdk25-temurin-noble
-    container_name: some-tomcat
+  backend:
+    build:
+      context: ./backend
+      dockerfile: src/main/docker/Dockerfile.jvm
+    container_name: some-backend
+    env_file: ".env"
     ports:
       - "8080:8080"
     depends_on:
